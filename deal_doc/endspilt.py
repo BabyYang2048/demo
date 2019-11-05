@@ -1,3 +1,6 @@
+import math
+
+
 def __delete_line__(file_in,file_out):
     """
     按行读取去空行
@@ -72,18 +75,19 @@ def __pair2line__(file_in_1, file_in_2, file_out):
         f.close()
 
 
-def __line2pair__(file_in,file_out_1,file_out_2):
+def __line2pair__(file_in,file_out_1,file_out_2,symbol):
     """
     将quchong后的上下联拆开到各自的文件中
     :param file_in: "../data/result.txt"
     :param file_out_1: "../data/first.txt"
     :param file_out_2: "../data/second.txt"
+    :param symbol 以symbol拆分
     :return:
     """
     with open(file_in, 'r', encoding='utf-8') as f:
         for line in f:
             # line.strip("\n")
-            list = line.split("\t")
+            list = line.split(symbol)
             print(list[0])
             print(list[1])
             with open(file_out_1, 'a', encoding='utf-8') as file_obj:
@@ -196,7 +200,7 @@ def __spilt_byotherchar__(file_in,file_out):
                 file_obj.write(linea)
 
 
-def __quchong__(file_in,file_out):
+def __quchong1__(file_in,file_out):
     """
     按行去重 ，在binghang之后使用
     :param file_in: "../data/re1.txt"
@@ -219,20 +223,55 @@ def __quchong__(file_in,file_out):
     f.close()
 
 
-def __castdown__(file_in, file_out, num):
+def __quchong2__(file_in_1,file_in_2,file_out_1,file_out_2):
     """
-    截断文件的前num行
+    对联的上下联都不允许重复
+    :param file_in_1:
+    :param file_in_2:
+    :param file_out_1:
+    :param file_out_2:
+    :return:
+    """
+    f1 = open(file_in_1, 'r', encoding='utf-8')
+    f2 = open(file_in_2, 'r', encoding='utf-8')
+    lines_seen = set()
+
+    try:
+        for line1, line2 in zip(f1.readlines(), f2.readlines()):
+            if line1 not in lines_seen and len(line1)>2:
+                with open(file_out_1,'a',encoding='utf-8') as f_obj:
+                    f_obj.write(line1)
+                with open(file_out_2, 'a', encoding='utf-8') as f_obj:
+                    f_obj.write(line2)
+                lines_seen.add(line1)
+            else:
+                print("line1=", line1)
+                print("line2=", line2)
+                continue
+
+    finally:
+        f1.close()
+        f2.close()
+
+
+def __castdown__(file_in, file_out, start, end):
+    """
+    截断文件的部分行
     :param file_in:
     :param file_out:
-    :param num: 截断的行数
+    :param start: 起始行
+    :param end: 结束行
     :return:
     """
     with open(file_in,'r',encoding='utf-8') as f:
         for ii, line in enumerate(f):
-            if ii == num:
-                break
-            with open(file_out,'a',encoding='utf-8') as f_obj:
-                f_obj.write(line)
+            if ii < start :
+                continue
+            else:
+                if ii == end:
+                    break
+                with open(file_out,'a',encoding='utf-8') as f_obj:
+                    f_obj.write(line)
 
 
 def __pingjie__(file_in, file_out):
@@ -277,10 +316,52 @@ def __test__(file_in_1, file_in_2, file_out):
         f.close()
 
 
+def __count__(file_in):
+    try:
+        word2count = {}
+        with open(file_in,'r',encoding='utf-8') as f:
+            for line in f:
+                num = len(line.strip('\n'))
+                if num not in word2count.keys():
+                    word2count[num] = 1
+                    # print(num,word2count[num])
+                else:
+                    word2count[num] = word2count[num] + 1
+        # print(word2count)
+        sort_word2count = sorted(word2count)
+        for c in sort_word2count:
+            print(c,'字联',word2count[c],'条')
+        z = zip(word2count.values(), word2count.keys())
+        a = sorted(z)
+        print(a)
+        # for c in sort_word2count:
+        #     print(c,'字联',word2count[c],'条')
+    finally:
+        f.close()
+
+
+
+
 if __name__ == '__main__':
     print("start..")
-    # file_in = "../data/d_result.txt"
-    # file_out = "../data/a.txt"
-    # __binghang__(file_in,file_out,symbol="")
-
+    file_in = "../data/d_duilian_first.txt"
+    file_out= "../data/duilian_first.txt"
+    file_in_1 = "../data/.txt"
+    file_in_2 = "../data/.txt"
+    file_out_1 = "../data/d_wuqing_first.txt"
+    file_out_2 = "../data/d_wuqing_second.txt"
+    # start = 569782-226
+    # end = 569782
+    # __castdown__(file_in,file_out,start,end)
+    # __spilt_byotherchar__(file_in,file_out)
+    # __line2pair__(file_in,file_out_1,file_out_2,"||")
+    # __quchong2__(file_in_1,file_in_2,file_out_1,file_out_2)
+    # __pair2line__(file_in_1,file_in_2,file_out)
+    # __binghang__(file_in,file_out,symbol="||")
+    # __test__(file_in_1,file_in_2,file_out)
+    # __binghang__(file_in, file_out, symbol="")
+    # __line2pair__(file_in,file_out_1,file_out_2,symbol="||")
+    # __add_space__(file_in,file_out)
+    # __count__(file_in)
     print("end...")
+
